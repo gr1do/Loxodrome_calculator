@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>414</width>
+    <height>511</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="7" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>Длина локсодромы</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QLineEdit" name="loxodrome_length_line">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="units_of_loxodrome_measurement_box">
+            <item>
+             <property name="text">
+              <string>км</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>морские мили</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>сухопутные мили</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Длина ортодромы</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="QLineEdit" name="orthodrome_length_line">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="units_of_orthodrome_measurement_box">
+            <item>
+             <property name="text">
+              <string>км</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>морские мили</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>сухопутные мили</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item row="3" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <item>
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Курс</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="course_line">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="placeholderText">
+         <string/>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="2" column="0">
+     <widget class="QPushButton" name="calculate_course_button">
+      <property name="text">
+       <string>Вычислить курс</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Начальная точка</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLineEdit" name="start_latitude_line">
+          <property name="placeholderText">
+           <string>Широта</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="start_latitude_hemisphere_box">
+          <item>
+           <property name="text">
+            <string>с. ш.</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>ю. ш.</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="start_longitude_line">
+          <property name="placeholderText">
+           <string>Долгота</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="start_longitude_hemisphere_box">
+          <item>
+           <property name="text">
+            <string>в. д.</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>з. д.</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Конечная точка</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLineEdit" name="end_latitude_line">
+          <property name="placeholderText">
+           <string>Широта</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="end_latitude_hemisphere_box">
+          <item>
+           <property name="text">
+            <string>с. ш.</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>ю. ш.</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="end_longitude_line">
+          <property name="placeholderText">
+           <string>Долгота</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="end_longitude_hemisphere_box">
+          <item>
+           <property name="text">
+            <string>в. д.</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>з. д.</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>414</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Что ищем?</string>
+    </property>
+    <addaction name="action_2"/>
+    <addaction name="action"/>
+   </widget>
+   <addaction name="menu"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="action">
+   <property name="text">
+    <string>Долготу по начальной точке и курсу</string>
+   </property>
+  </action>
+  <action name="action_2">
+   <property name="text">
+    <string>Курс по начальной и конечной точкам</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
