@@ -2,8 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "secondwindow.h"
-#include "geodesicfunctions.h"
+#include "Headers/secondwindow.h"
+#include "Headers/geodesicfunctions.h"
+#include "Headers/plottingfunctions.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -39,5 +40,6 @@ private:
     SecondWindow *sw;
 
     GeodesicFunctions gf;
+    PlottingFunctions *pf;
 };
 #endif // MAINWINDOW_H

@@ -1,4 +1,4 @@
-#include "secondwindow.h"
+#include "Headers/secondwindow.h"
 #include "ui_secondwindow.h"
 
 SecondWindow::SecondWindow(QWidget *parent)

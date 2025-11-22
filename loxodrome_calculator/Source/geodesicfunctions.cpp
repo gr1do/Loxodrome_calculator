@@ -1,5 +1,6 @@
-#include "geodesicfunctions.h"
+#include "Headers/geodesicfunctions.h"
 #include "cmath"
+#include "QDebug"
 
 GeodesicFunctions::GeodesicFunctions() {}
 

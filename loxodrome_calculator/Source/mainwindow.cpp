@@ -1,7 +1,9 @@
-#include "mainwindow.h"
+#include "Headers/mainwindow.h"
 #include "ui_mainwindow.h"
 #include "cmath"
 #include "QDebug"
+#include <QtGraphsWidgets/q3dsurfacewidgetitem.h>
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -11,7 +13,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     sw = new SecondWindow;
 
+
+    pf = new PlottingFunctions(this);
+    pf->PlotSphere();
+    pf->surface->widget()->show();
+
+
     connect(sw, &SecondWindow::OpenMainWindow, this, &MainWindow::show);
+
 }
 
 
@@ -70,6 +79,17 @@ void MainWindow::on_calculate_course_button_clicked()
     {
         ui->orthodrome_length_line->setText("-");
     }
+
+
+
+    QVector<double> X = {cos(start_longitude)*cos(start_latitude), cos(end_longitude)*cos(end_latitude)};
+    QVector<double> Z = {cos(start_latitude)*sin(start_longitude), cos(end_latitude)*sin(end_longitude)};
+    QVector<double> Y = {sin(start_latitude), sin(end_latitude)};
+
+
+
+
+    pf->RePlot(X, Z, Y);
 }
 
 

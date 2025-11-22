@@ -2,7 +2,7 @@
 #define SECONDWINDOW_H
 
 #include <QMainWindow>
-#include "geodesicfunctions.h"
+#include "Headers/geodesicfunctions.h"
 
 namespace Ui {
 class SecondWindow;
