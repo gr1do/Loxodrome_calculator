@@ -20,7 +20,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    int lox_index = 0;
+    int lox_index = 0; // Прошлые индексы размерности локсодромы и ортодромы соответственно (для перевода км в мили)
     int orth_index = 0;
 
 private slots:
@@ -34,6 +34,8 @@ private slots:
     void on_units_of_loxodrome_measurement_box_currentIndexChanged(int index);
 
     void on_units_of_orthodrome_measurement_box_currentIndexChanged(int index);
+
+    void GetCoordinates(QVector<QVector<double>>, QColor);
 
 private:
     Ui::MainWindow *ui;

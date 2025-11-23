@@ -15,11 +15,14 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     pf = new PlottingFunctions(this);
+
     pf->PlotSphere();
     pf->surface->widget()->show();
 
 
     connect(sw, &SecondWindow::OpenMainWindow, this, &MainWindow::show);
+    connect(sw, &SecondWindow::SendCoordinates, this, &MainWindow::GetCoordinates);
+
 
 }
 
@@ -75,21 +78,22 @@ void MainWindow::on_calculate_course_button_clicked()
 
     ui->orthodrome_length_line->setText(QString::number(orthodrome_length));
 
-    if ((start_latitude == M_PI/2 && end_latitude == M_PI/2) || (start_latitude == -M_PI/2 && end_latitude == -M_PI/2)) // Условия при совпадении полюсов (ПОЧЕМУ ТОЛЬКО ПОЛЮСОВ А НЕ ТОЧЕК???)
+    if ((start_latitude == M_PI/2 && end_latitude == M_PI/2) || (start_latitude == -M_PI/2 && end_latitude == -M_PI/2)) // Условия при совпадении полюсов (хотя сомнительно, типа зачем? Но пусть будет)
     {
         ui->orthodrome_length_line->setText("-");
     }
 
 
+    // Строим локсодрому
+    QVector<QVector<double>> loxodrome_coordinates = gf.FindLoxodromePoints(start_latitude, end_latitude, start_longitude, end_longitude, course);
 
-    QVector<double> X = {cos(start_longitude)*cos(start_latitude), cos(end_longitude)*cos(end_latitude)};
-    QVector<double> Z = {cos(start_latitude)*sin(start_longitude), cos(end_latitude)*sin(end_longitude)};
-    QVector<double> Y = {sin(start_latitude), sin(end_latitude)};
-
-
+    pf->RePlot(loxodrome_coordinates[0], loxodrome_coordinates[1], loxodrome_coordinates[2], QColor(255, 0, 0));
 
 
-    pf->RePlot(X, Z, Y);
+    //Строим ортодрому
+    QVector<QVector<double>> orthodrome_coordinates = gf.FindOrthodromePoints(start_latitude, end_latitude, start_longitude, end_longitude);
+
+    pf->RePlot(orthodrome_coordinates[0], orthodrome_coordinates[1], orthodrome_coordinates[2], QColor(0, 255, 0));
 }
 
 
@@ -99,7 +103,7 @@ void MainWindow::on_action_2_triggered()
 }
 
 
-void MainWindow::on_action_triggered()
+void MainWindow::on_action_triggered() // Переход от первого окна ко второму
 {
     this->hide();
 
@@ -107,7 +111,7 @@ void MainWindow::on_action_triggered()
 }
 
 
-void MainWindow::on_units_of_loxodrome_measurement_box_currentIndexChanged(int new_index)
+void MainWindow::on_units_of_loxodrome_measurement_box_currentIndexChanged(int new_index) // Изменение единиц измерения длины локсодромы
 {
     ui->loxodrome_length_line->setText(QString::number(gf.UnitsOfMeasurementChanging(lox_index, new_index, ui->loxodrome_length_line->text().toDouble())));
 
@@ -115,10 +119,15 @@ void MainWindow::on_units_of_loxodrome_measurement_box_currentIndexChanged(int n
 }
 
 
-void MainWindow::on_units_of_orthodrome_measurement_box_currentIndexChanged(int new_index)
+void MainWindow::on_units_of_orthodrome_measurement_box_currentIndexChanged(int new_index) // Изменение единиц измерения длины ортодромы
 {
     ui->orthodrome_length_line->setText(QString::number(gf.UnitsOfMeasurementChanging(orth_index, new_index, ui->orthodrome_length_line->text().toDouble())));
 
     orth_index = new_index;
+}
+
+void MainWindow::GetCoordinates(QVector<QVector<double>> coordinates, QColor color) // Построение графика, рассчитанного во втором окне
+{
+    pf->RePlot(coordinates[0], coordinates[1], coordinates[2], color);
 }
 

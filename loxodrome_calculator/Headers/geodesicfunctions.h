@@ -1,5 +1,6 @@
 #ifndef GEODESICFUNCTIONS_H
 #define GEODESICFUNCTIONS_H
+#include "QVector"
 
 class GeodesicFunctions
 {
@@ -19,6 +20,14 @@ public:
     double FindOrthodromeLength(double, double, double, double);
 
     double FindLongitude(double, double, double, double);
+
+    QVector<QVector<double>> FindLoxodromePoints(double, double, double, double, double);
+
+    QVector<QVector<double>> FindOrthodromePoints(double, double, double, double);
+
+    QVector<QVector<double>> FindEcuatorPoints();
+
+    QVector<QVector<double>> FindGreenwichPoints();
 };
 
 

@@ -33,6 +33,8 @@ private slots:
 signals:
     void OpenMainWindow();
 
+    void SendCoordinates(QVector<QVector<double>>, QColor);
+
 private:
     Ui::SecondWindow *ui;
 

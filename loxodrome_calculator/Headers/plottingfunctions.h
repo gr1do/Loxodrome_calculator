@@ -3,8 +3,9 @@
 
 #include <QtGraphsWidgets/q3dsurfacewidgetitem.h>
 #include "QVector"
-// #include <QtGraphs>
 #include "QObject"
+#include "Headers/geodesicfunctions.h"
+#include "QCustom3DItem"
 
 
 class PlottingFunctions : public QObject
@@ -18,15 +19,20 @@ public:
 
     void PlotSphere();
 
-    void PlotTrajectory(const QVector<double> &X, const QVector<double> &Z, const QVector<double> &Y);
+    void PlotTrajectory(const QVector<double> &X, const QVector<double> &Z, const QVector<double> &Y, QColor);
 
-    void RePlot(const QVector<double> &X, const QVector<double> &Z, const QVector<double> &Y);
+    void RePlot(const QVector<double> &X, const QVector<double> &Z, const QVector<double> &Y, QColor);
 
-    Q3DSurfaceWidgetItem *surface;
+    Q3DSurfaceWidgetItem *surface; // Виджет графика
 
     QQuickWidget *quickWidget;
 
-    QVector<QSurface3DSeries*> all_series;
+    QVector<QSurface3DSeries*> all_loxodrome_series; // Массив с тосками локсодромы
+
+    QVector<QSurface3DSeries*> all_orthodrome_series; // Массив с точками ортодромы
+
+private:
+    GeodesicFunctions gf;
 };
 
 #endif // PLOTTINGFUNCTIONS_H
