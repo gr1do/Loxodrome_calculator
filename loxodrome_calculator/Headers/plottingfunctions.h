@@ -23,11 +23,15 @@ public:
 
     void RePlot(const QVector<double> &X, const QVector<double> &Z, const QVector<double> &Y, QColor);
 
+    void BackCamera();
+
     Q3DSurfaceWidgetItem *surface; // Виджет графика
 
     QQuickWidget *quickWidget;
 
-    QVector<QSurface3DSeries*> all_loxodrome_series; // Массив с тосками локсодромы
+    QVector<QSurface3DSeries*> all_loxodrome_series; // Массив с точками локсодромы
+
+    QVector<QSurface3DSeries*> all_numerical_loxodrome_series; // Массив с точками численной локсодромы
 
     QVector<QSurface3DSeries*> all_orthodrome_series; // Массив с точками ортодромы
 

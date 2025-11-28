@@ -36,10 +36,12 @@ void PlottingFunctions::SetUp() // Функция для создания и н�
     surface->activeTheme()->setBackgroundVisible(0); // Убираем какой-то фон
 
 
-    surface->setCameraXRotation(-90); // Начальное положение камеры
+    BackCamera(); // Начальное положение камеры
 
     surface->setMinCameraYRotation(-360); // Убираем ограниечение поворота
     surface->setMaxCameraYRotation(360);
+
+    surface->setSelectionEnabled(false); // Выключаем возможность выделения, т.к. это не информативно из-за ДСК
 }
 
 
@@ -75,18 +77,16 @@ void PlottingFunctions::PlotSphere()
     surface->addSeries(series);
 
 
-    // Делаем экватор и гринвичский меридиан
+    // Делаем экватор и меридианы
+
     // Экватор
     QVector<QVector<double>> ecuator_coordinates = gf.FindEcuatorPoints();
     PlotTrajectory(ecuator_coordinates[0], ecuator_coordinates[1], ecuator_coordinates[2], QColor(0, 0, 0));
 
-    // Гринвич
+    // Меридианы
     QVector<QVector<double>> greenwich_coordinates = gf.FindGreenwichPoints();
-    PlotTrajectory(greenwich_coordinates[0], greenwich_coordinates[1], greenwich_coordinates[2], QColor(0, 0, 0));
-
-
-    // Добавим точку (0; 0)
-
+    PlotTrajectory(greenwich_coordinates[0], greenwich_coordinates[1], greenwich_coordinates[2], QColor(255, 0, 255)); // Гринвич
+    PlotTrajectory(greenwich_coordinates[3], greenwich_coordinates[4], greenwich_coordinates[5], QColor(0, 0, 0)); // Три других меридиана
 }
 
 
@@ -103,11 +103,11 @@ void PlottingFunctions::PlotTrajectory(const QVector<double> &X, const QVector<d
         dataRow.clear();
 
 
-        for (int teta = 0; teta <= 18; teta+=9) // Просчитываем точки каждой маленькой фигуры, которой обозначаем траекторию
+        for (int phi = 0; phi <= 36; phi+=6) // Просчитываем точки каждой маленькой фигуры, которой обозначаем траекторию
         {
-            for (int phi = 0; phi <= 36; phi+=9)
+            for (double teta = 0; teta <= 18; teta+=3)
             {
-                dataRow << QSurfaceDataItem((float)(6400 * (cos(phi*M_PI/18)*sin(teta*M_PI/18) *0.02 + X[i])), (float)(6400 * (sin(phi*M_PI/18)*sin(teta*M_PI/18) *0.02 + Y[i])), (float)(6400 * (cos(teta*M_PI/18) *0.02 + Z[i])));
+                dataRow << QSurfaceDataItem((float)(6330 * (cos(phi*M_PI/18)*sin(teta*M_PI/18) *0.02 + X[i])), (float)(6330 * (sin(phi*M_PI/18)*sin(teta*M_PI/18) *0.02 + Y[i])), (float)(6330 * (cos(teta*M_PI/18) *0.02 + Z[i])));
             }
 
             Rows.append(dataRow);
@@ -125,6 +125,8 @@ void PlottingFunctions::PlotTrajectory(const QVector<double> &X, const QVector<d
         if (color == QColor(255, 0, 0)) {all_loxodrome_series.append(series);} // Условие локсодромы (красный)
 
         if (color == QColor(0, 255, 0)) {all_orthodrome_series.append(series);} // Условие ортодромы (зеленый)
+
+        if (color == QColor(255, 255, 0)) {all_numerical_loxodrome_series.append(series);} // Условие численной локсодромы (желтый)
 
         series->dataProxy()->resetArray(data);
 
@@ -149,6 +151,17 @@ void PlottingFunctions::RePlot(const QVector<double> &X, const QVector<double> &
         all_loxodrome_series.clear();
     }
 
+    if (color == QColor(255, 255, 0)) // Если локсодрома (красный)
+    {
+        for (auto series : all_numerical_loxodrome_series) // Удаляем предыдущую траекторию численной локсодромы и очищаем массив, где она хранятся
+        {
+            surface->removeSeries(series);
+            delete series;
+        }
+
+        all_numerical_loxodrome_series.clear();
+    }
+
 
     if (color == QColor(0, 255, 0)) // Если ортодрома (зеленый)
     {
@@ -163,4 +176,12 @@ void PlottingFunctions::RePlot(const QVector<double> &X, const QVector<double> &
 
 
     PlotTrajectory(X, Z, Y, color);
+}
+
+void PlottingFunctions::BackCamera() // Возвращение камеры в начальное положение
+{
+    surface->setCameraXRotation(-90);
+    surface->setCameraYRotation(0);
+
+    surface->activeTheme()->update();
 }

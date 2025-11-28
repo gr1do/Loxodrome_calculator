@@ -5,6 +5,8 @@
 #include "Headers/secondwindow.h"
 #include "Headers/geodesicfunctions.h"
 #include "Headers/plottingfunctions.h"
+#include "ui_mainwindow.h"
+#include "QStandardItemModel"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -23,6 +25,8 @@ public:
     int lox_index = 0; // Прошлые индексы размерности локсодромы и ортодромы соответственно (для перевода км в мили)
     int orth_index = 0;
 
+    QStandardItemModel *table_model;
+
 private slots:
 
     void on_calculate_course_button_clicked();
@@ -36,6 +40,8 @@ private slots:
     void on_units_of_orthodrome_measurement_box_currentIndexChanged(int index);
 
     void GetCoordinates(QVector<QVector<double>>, QColor);
+
+    void on_reset_camera_clicked();
 
 private:
     Ui::MainWindow *ui;

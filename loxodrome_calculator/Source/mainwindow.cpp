@@ -1,9 +1,8 @@
 #include "Headers/mainwindow.h"
-#include "ui_mainwindow.h"
 #include "cmath"
 #include "QDebug"
 #include <QtGraphsWidgets/q3dsurfacewidgetitem.h>
-
+//#include "QDoubleValidator"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -20,9 +19,25 @@ MainWindow::MainWindow(QWidget *parent)
     pf->surface->widget()->show();
 
 
+    table_model = new QStandardItemModel;
+
+    table_model->setHorizontalHeaderLabels({"Долгота", "Широта (численная)", "Широта (аналитическая)", "Разница широт"});
+    ui->loxodromes_coordinate_table->setModel(table_model);
+
+
     connect(sw, &SecondWindow::OpenMainWindow, this, &MainWindow::show);
     connect(sw, &SecondWindow::SendCoordinates, this, &MainWindow::GetCoordinates);
+    connect(sw, &SecondWindow::ResetCamera, this, &MainWindow::on_reset_camera_clicked);
 
+    // Устанавливаем ограничение на ввод значений
+    QRegularExpressionValidator *latitude_validator = new QRegularExpressionValidator(QRegularExpression("^(90(\\.0{1,3})?|([0-8]?[0-9])(\\.\\d{1,3})?)$"));
+    QRegularExpressionValidator *longitude_validator = new QRegularExpressionValidator(QRegularExpression("^(180(\\.0{1,3})?|([1]?[0-7][0-9])(\\.\\d{1,3})?)$"));
+
+    ui->start_longitude_line->setValidator(longitude_validator);
+    ui->start_latitude_line->setValidator(latitude_validator);
+    ui->end_longitude_line->setValidator(longitude_validator);
+    ui->end_latitude_line->setValidator(latitude_validator);
+    ui->delta_longitude_line->setValidator(longitude_validator);
 
 }
 
@@ -35,6 +50,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_calculate_course_button_clicked()
 {
+    //lox_index = 0
     double start_latitude = ui->start_latitude_line->text().toDouble() * M_PI/180; // Задаем значения и сразу переводим в радианы
     if (ui->start_latitude_hemisphere_box->currentIndex() == 1) {start_latitude = gf.SouthToNorth(start_latitude);} //Теперь все значения переведем в с.ш. и в.д.
 
@@ -84,15 +100,36 @@ void MainWindow::on_calculate_course_button_clicked()
     }
 
 
-    // Строим локсодрому
-    QVector<QVector<double>> loxodrome_coordinates = gf.FindLoxodromePoints(start_latitude, end_latitude, start_longitude, end_longitude, course);
-
+    // Строим локсодрому двумя способами
+    loxodrome_length = gf.UnitsOfMeasurementChanging(lox_index, 0, loxodrome_length);
+    QVector<QVector<double>> loxodrome_coordinates = gf.FindLoxodromePoints(start_latitude, end_latitude, start_longitude, end_longitude, course, loxodrome_length);
     pf->RePlot(loxodrome_coordinates[0], loxodrome_coordinates[1], loxodrome_coordinates[2], QColor(255, 0, 0));
 
+    QVector<QVector<double>> numerical_loxodrome_coordinates = gf.FindNumericalLoxodromePoints(start_latitude, end_latitude, start_longitude, end_longitude, course, ui->delta_longitude_line->text().toDouble() * M_PI/180);
+    pf->RePlot(numerical_loxodrome_coordinates[0], numerical_loxodrome_coordinates[1], numerical_loxodrome_coordinates[2], QColor(255, 255, 0));
+
+    // Выводим значения в таблицу
+    QVector<QVector<double>> numerical_loxodrome_spheric_coordinates = gf.GetLatitudeAndLongitudeFromXZY(numerical_loxodrome_coordinates); // Задаем массивы сферических коордтнат
+    QVector<double> loxodrome_latitudes;
+
+    for (int i = 0; i < numerical_loxodrome_spheric_coordinates[0].length(); i++)
+    {
+        loxodrome_latitudes.append(gf.FindLatitude(start_latitude, start_longitude, numerical_loxodrome_spheric_coordinates[0][i], course));
+    }
+
+    table_model->setRowCount(loxodrome_latitudes.length()); // Изменяем размер таблицы и вводим значения
+
+    for(int i = 0; i < numerical_loxodrome_spheric_coordinates[0].length(); i++)
+    {
+        table_model->setItem(i, 0, new QStandardItem(QString::number(numerical_loxodrome_spheric_coordinates[0][i] * 180 / M_PI)));
+        table_model->setItem(i, 1, new QStandardItem(QString::number(numerical_loxodrome_spheric_coordinates[1][i] * 180 / M_PI)));
+        table_model->setItem(i, 2, new QStandardItem(QString::number(loxodrome_latitudes[i] * 180 / M_PI)));
+        table_model->setItem(i, 3, new QStandardItem(QString::number((numerical_loxodrome_spheric_coordinates[1][i] - loxodrome_latitudes[i]) * 180 / M_PI)));
+    }
 
     //Строим ортодрому
-    QVector<QVector<double>> orthodrome_coordinates = gf.FindOrthodromePoints(start_latitude, end_latitude, start_longitude, end_longitude);
-
+    orthodrome_length = gf.UnitsOfMeasurementChanging(orth_index, 0, orthodrome_length);
+    QVector<QVector<double>> orthodrome_coordinates = gf.FindOrthodromePoints(start_latitude, end_latitude, start_longitude, end_longitude, orthodrome_length);
     pf->RePlot(orthodrome_coordinates[0], orthodrome_coordinates[1], orthodrome_coordinates[2], QColor(0, 255, 0));
 }
 
@@ -129,5 +166,11 @@ void MainWindow::on_units_of_orthodrome_measurement_box_currentIndexChanged(int 
 void MainWindow::GetCoordinates(QVector<QVector<double>> coordinates, QColor color) // Построение графика, рассчитанного во втором окне
 {
     pf->RePlot(coordinates[0], coordinates[1], coordinates[2], color);
+}
+
+
+void MainWindow::on_reset_camera_clicked()
+{
+    pf->BackCamera();
 }
 

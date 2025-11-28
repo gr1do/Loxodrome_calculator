@@ -26,6 +26,9 @@ double GeodesicFunctions::UnitsOfMeasurementChanging(int previous_index, int cur
     case 3:
         return value * 1.852;
         break;
+    case 4:
+        return value / 1.852;
+        break;
     case 5:
         return value * 1.852 / 1.60934;
         break;
@@ -60,7 +63,6 @@ double GeodesicFunctions::FindCourse(double start_latitude, double end_latitude,
     }
 
     course = atan2(longitude_difference, log(tan(M_PI/4 + end_latitude/2)) - log(tan(M_PI/4 + start_latitude/2))); // Сама формула
-    // course = atan2(end_longitude - start_longitude, log(tan(M_PI/4 + end_latitude/2)) - log(tan(M_PI/4 + start_latitude/2))); // Сама формула
     course = fmod(course + 2*M_PI, 2*M_PI); // Переход к интервалу [0; 2pi]
 
     if (start_latitude == M_PI/2 && fmod(end_latitude, M_PI/2) != 0) {course = M_PI;} // Условия при полюсах
@@ -101,7 +103,27 @@ double GeodesicFunctions::FindLongitude(double start_latitude, double assigned_l
     return unknown_longitude;
 }
 
-QVector<QVector<double>> GeodesicFunctions::FindLoxodromePoints(double start_latitude, double end_latitude, double start_longitude, double end_longitude, double course) // Функция для нохождения точек локсодромы
+double GeodesicFunctions::FindLatitude(double start_latitude, double start_longitude, double assigned_longitude, double course)
+{
+    double delta_longitude;
+    if (abs(assigned_longitude - start_longitude) <= M_PI) // Улсовия пля построения меньшей дуги большого круга
+    {
+        delta_longitude = (assigned_longitude - start_longitude);
+    }
+    if (assigned_longitude - start_longitude < -M_PI)
+    {
+        delta_longitude = (2 * M_PI - abs(assigned_longitude - start_longitude));
+    }
+    if (assigned_longitude - start_longitude > M_PI)
+    {
+        delta_longitude = - (2 * M_PI - abs(assigned_longitude - start_longitude));
+    }
+
+    double unknown_latitude = 2 * (atan(exp(delta_longitude / tan(course)) * tan(M_PI / 4 + start_latitude / 2)) - M_PI / 4);
+    return unknown_latitude;
+}
+
+QVector<QVector<double>> GeodesicFunctions::FindLoxodromePoints(double start_latitude, double end_latitude, double start_longitude, double end_longitude, double course, double length) // Функция для нохождения точек локсодромы
 {
     QVector<double> X; // Определяем массивы координат
     QVector<double> Z;
@@ -115,8 +137,7 @@ QVector<QVector<double>> GeodesicFunctions::FindLoxodromePoints(double start_lat
     Z.append(cos(end_latitude)*sin(end_longitude));
     Y.append(sin(end_latitude));
 
-    int steps = 250;
-
+    int steps = int(round(length / 250));
 
 
     if (start_latitude == end_latitude && start_longitude != end_longitude) // Условие совпадения широт
@@ -169,7 +190,62 @@ QVector<QVector<double>> GeodesicFunctions::FindLoxodromePoints(double start_lat
     return coordinates;
 }
 
-QVector<QVector<double>> GeodesicFunctions::FindOrthodromePoints(double start_latitude, double end_latitude, double start_longitude, double end_longitude) // Функция для нохождения точек ортодромы
+QVector<QVector<double>> GeodesicFunctions::FindNumericalLoxodromePoints(double start_latitude, double end_latitude, double start_longitude, double end_longitude, double course, double delta_longitude)
+{
+    QVector<double> X; // Определяем массивы координат
+    QVector<double> Z;
+    QVector<double> Y;
+
+    X.append(cos(start_longitude)*cos(start_latitude)); // Записываем первую и конечную точки
+    Z.append(cos(start_latitude)*sin(start_longitude));
+    Y.append(sin(start_latitude));
+
+    if (delta_longitude == 0) // Если шаг 0, что будет только начальная точка
+    {
+        QVector<QVector<double>> coordinates = {X, Z, Y};
+        return coordinates;
+    }
+
+    if (start_latitude == end_latitude)
+    {
+        QVector<QVector<double>> coordinates = {X, Z, Y};
+        return coordinates;
+    }
+
+    // Добавляем вторую точку
+    if (sin(course) < 0) {delta_longitude  = - delta_longitude;}
+    if (sin(course) > 0) {delta_longitude  = delta_longitude;}
+
+
+    double latitude;
+    double longitude = (floor(start_longitude / (delta_longitude)) + 1) * delta_longitude;
+    latitude = M_PI / 2 - atan2(sin(M_PI/2 - start_latitude), (cos(M_PI/2 - start_latitude) * cos(delta_longitude) + sin(delta_longitude) / tan(course))); // проверить
+
+    X.append(cos(longitude)*cos(latitude));
+    Z.append(cos(latitude)*sin(longitude));
+    Y.append(sin(latitude));
+
+    while (true) // Последовательно добавляем остальные точки
+    {
+
+        latitude = M_PI / 2 - atan2(sin(M_PI/2 - latitude), (cos(M_PI/2 - latitude) * cos(delta_longitude) + sin(delta_longitude) / tan(course))); // проверить
+        longitude += delta_longitude;
+
+        if (latitude <= end_latitude && cos(course) < 0) {break;}
+        if (latitude >= end_latitude && cos(course) > 0) {break;}
+
+        X.append(cos(longitude)*cos(latitude));
+        Z.append(cos(latitude)*sin(longitude));
+        Y.append(sin(latitude));
+    }
+
+    QVector<QVector<double>> coordinates = {X, Z, Y};
+
+    return coordinates;
+}
+
+
+QVector<QVector<double>> GeodesicFunctions::FindOrthodromePoints(double start_latitude, double end_latitude, double start_longitude, double end_longitude, double length) // Функция для нохождения точек ортодромы
 {
     QVector<double> X; // Определяем массивы координат
     QVector<double> Z;
@@ -183,7 +259,7 @@ QVector<QVector<double>> GeodesicFunctions::FindOrthodromePoints(double start_la
     Z.append(cos(end_latitude)*sin(end_longitude));
     Y.append(sin(end_latitude));
 
-    int steps = 250;
+    int steps = int(round(length / 250));
 
     if (start_longitude == end_longitude) // Случай совпадения долгот
     {
@@ -238,7 +314,6 @@ QVector<QVector<double>> GeodesicFunctions::FindOrthodromePoints(double start_la
         {
             double longitude = start_longitude + i * delta_longitude;
             double latitude = - atan((A * cos(longitude) + B * sin(longitude)) / C); // Само уравнение
-            qDebug() << latitude;
 
             X.append(cos(longitude)*cos(latitude));
             Z.append(cos(latitude)*sin(longitude));
@@ -256,9 +331,9 @@ QVector<QVector<double>> GeodesicFunctions::FindEcuatorPoints() // Считае�
     QVector<double> Z;
     QVector<double> Y;
 
-    for (double i = 0; i < 360; i += 3.6)
+    for (double i = 0; i < 360; i += 10)
     {
-        double longitude = i;
+        double longitude = i * M_PI / 180;
 
         X.append(cos(longitude));
         Z.append(sin(longitude));
@@ -272,20 +347,63 @@ QVector<QVector<double>> GeodesicFunctions::FindEcuatorPoints() // Считае�
 
 QVector<QVector<double>> GeodesicFunctions::FindGreenwichPoints() // Считаем точки Гринвичского меридиана
 {
-    QVector<double> X; // Определяем массивы координат
-    QVector<double> Z;
-    QVector<double> Y;
+    QVector<double> X_0; // Определяем массивы координат Гринвичского меридиана
+    QVector<double> Z_0;
+    QVector<double> Y_0;
 
-    for (double i = 0; i < 360; i += 3.6)
+    QVector<double> X_180; // Определяем массивы координат меридиана противоположного Гринвичскому и двух ортогональных ему
+    QVector<double> Z_180;
+    QVector<double> Y_180;
+
+    for (double i = -90; i < 90; i += 10) // Считаем Гринвич
     {
-        double latitude = i;
+        double latitude = i * M_PI / 180;
 
-        X.append(cos(latitude));
-        Z.append(0);
-        Y.append(sin(latitude));
+        X_0.append(cos(latitude));
+        Z_0.append(0);
+        Y_0.append(sin(latitude));
     }
 
-    QVector<QVector<double>> coordinates = {X, Z, Y};
+    for (double i = 90; i < 270; i += 10) // Считаем обратный
+    {
+        double latitude = i * M_PI / 180;
+
+        X_180.append(cos(latitude));
+        Z_180.append(0);
+        Y_180.append(sin(latitude));
+    }
+
+    for (double i = 0; i < 360; i += 10) // Считаем ортогональные
+    {
+        double latitude = i * M_PI / 180;
+
+        X_180.append(0);
+        Z_180.append(cos(latitude));
+        Y_180.append(sin(latitude));
+    }
+
+    QVector<QVector<double>> coordinates = {X_0, Z_0, Y_0, X_180, Z_180, Y_180};
 
     return coordinates;
+}
+
+QVector<QVector<double>> GeodesicFunctions::GetLatitudeAndLongitudeFromXZY(QVector<QVector<double>> coordinates)
+{
+    QVector<double> X = coordinates[0];
+    QVector<double> Z = coordinates[1];
+    QVector<double> Y = coordinates[2];
+
+    QVector<double> latitudes;
+    QVector<double> longitudes;
+
+    for (int i = 0; i < X.length(); i++)
+    {
+        latitudes.append(asin(Y[i]));
+
+        longitudes.append(atan2(Z[i], X[i]));
+    }
+
+    QVector<QVector<double>> spheric_coordinates = {longitudes, latitudes};
+
+    return spheric_coordinates;
 }

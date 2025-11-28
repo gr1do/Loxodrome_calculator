@@ -21,13 +21,19 @@ public:
 
     double FindLongitude(double, double, double, double);
 
-    QVector<QVector<double>> FindLoxodromePoints(double, double, double, double, double);
+    double FindLatitude(double, double, double, double);
 
-    QVector<QVector<double>> FindOrthodromePoints(double, double, double, double);
+    QVector<QVector<double>> FindLoxodromePoints(double, double, double, double, double, double);
+
+    QVector<QVector<double>> FindNumericalLoxodromePoints(double, double, double, double, double, double);
+
+    QVector<QVector<double>> FindOrthodromePoints(double, double, double, double, double);
 
     QVector<QVector<double>> FindEcuatorPoints();
 
     QVector<QVector<double>> FindGreenwichPoints();
+
+    QVector<QVector<double>> GetLatitudeAndLongitudeFromXZY(QVector<QVector<double>>);
 };
 
 
