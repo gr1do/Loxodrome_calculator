@@ -43,6 +43,10 @@ signals:
 
     void ResetCamera();
 
+    void SendAbsoluteGraph(QVector<double> longitudes, QVector<double> latitudes, int index);
+
+    void SendDifferenceGraph(QVector<double> latitudes, QVector<double> delta_longitudes);
+
 private:
     Ui::SecondWindow *ui;
 

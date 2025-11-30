@@ -5,7 +5,7 @@
 PlottingFunctions::PlottingFunctions(QObject *parent)
     : QObject(parent)
     , surface(nullptr)
-    , quickWidget(nullptr)
+    , surface_widget(nullptr)
 {
     SetUp();
 }
@@ -13,10 +13,10 @@ PlottingFunctions::PlottingFunctions(QObject *parent)
 
 void PlottingFunctions::SetUp() // Функция для создания и настроки виджета с графиком
 {
-    quickWidget = new QQuickWidget(); // Привязываем график к виджету
+    surface_widget = new QQuickWidget(); // Привязываем график к виджету
 
     surface = new Q3DSurfaceWidgetItem();
-    surface->setWidget(quickWidget);
+    surface->setWidget(surface_widget);
 
     surface->widget()->setMinimumSize(QSize(1024, 1024));
 
@@ -42,6 +42,7 @@ void PlottingFunctions::SetUp() // Функция для создания и н�
     surface->setMaxCameraYRotation(360);
 
     surface->setSelectionEnabled(false); // Выключаем возможность выделения, т.к. это не информативно из-за ДСК
+
 }
 
 

@@ -7,6 +7,7 @@
 #include "Headers/plottingfunctions.h"
 #include "ui_mainwindow.h"
 #include "QStandardItemModel"
+#include "Headers/graphswindow.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -25,7 +26,7 @@ public:
     int lox_index = 0; // Прошлые индексы размерности локсодромы и ортодромы соответственно (для перевода км в мили)
     int orth_index = 0;
 
-    QStandardItemModel *table_model;
+    QStandardItemModel *table_model; // Модель для таблицы
 
 private slots:
 
@@ -46,6 +47,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     SecondWindow *sw;
+    GraphsWindow *gw;
 
     GeodesicFunctions gf;
     PlottingFunctions *pf;

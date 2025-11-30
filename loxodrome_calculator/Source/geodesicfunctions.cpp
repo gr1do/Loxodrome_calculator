@@ -129,13 +129,13 @@ QVector<QVector<double>> GeodesicFunctions::FindLoxodromePoints(double start_lat
     QVector<double> Z;
     QVector<double> Y;
 
-    X.append(cos(start_longitude)*cos(start_latitude)); // Записываем первую и конечную точки
+    X.append(cos(start_longitude)*cos(start_latitude)); // Записываем первую точку
     Z.append(cos(start_latitude)*sin(start_longitude));
     Y.append(sin(start_latitude));
 
-    X.append(cos(end_longitude)*cos(end_latitude));
-    Z.append(cos(end_latitude)*sin(end_longitude));
-    Y.append(sin(end_latitude));
+    // X.append(cos(end_longitude)*cos(end_latitude));
+    // Z.append(cos(end_latitude)*sin(end_longitude));
+    // Y.append(sin(end_latitude));
 
     int steps = int(round(length / 250));
 
@@ -185,6 +185,10 @@ QVector<QVector<double>> GeodesicFunctions::FindLoxodromePoints(double start_lat
         }
     }
 
+    X.append(cos(end_longitude)*cos(end_latitude)); // Записываем конечную точку
+    Z.append(cos(end_latitude)*sin(end_longitude));
+    Y.append(sin(end_latitude));
+
     QVector<QVector<double>> coordinates = {X, Z, Y};
 
     return coordinates;
@@ -196,7 +200,7 @@ QVector<QVector<double>> GeodesicFunctions::FindNumericalLoxodromePoints(double 
     QVector<double> Z;
     QVector<double> Y;
 
-    X.append(cos(start_longitude)*cos(start_latitude)); // Записываем первую и конечную точки
+    X.append(cos(start_longitude)*cos(start_latitude)); // Записываем первую точку
     Z.append(cos(start_latitude)*sin(start_longitude));
     Y.append(sin(start_latitude));
 
@@ -251,13 +255,13 @@ QVector<QVector<double>> GeodesicFunctions::FindOrthodromePoints(double start_la
     QVector<double> Z;
     QVector<double> Y;
 
-    X.append(cos(start_longitude)*cos(start_latitude)); // Записываем первую и конечную точки
+    X.append(cos(start_longitude)*cos(start_latitude)); // Записываем первую точку
     Z.append(cos(start_latitude)*sin(start_longitude));
     Y.append(sin(start_latitude));
 
-    X.append(cos(end_longitude)*cos(end_latitude));
-    Z.append(cos(end_latitude)*sin(end_longitude));
-    Y.append(sin(end_latitude));
+    // X.append(cos(end_longitude)*cos(end_latitude));
+    // Z.append(cos(end_latitude)*sin(end_longitude));
+    // Y.append(sin(end_latitude));
 
     int steps = int(round(length / 250));
 
@@ -320,6 +324,10 @@ QVector<QVector<double>> GeodesicFunctions::FindOrthodromePoints(double start_la
             Y.append(sin(latitude));
         }
     }
+
+    X.append(cos(end_longitude)*cos(end_latitude)); //Записываем конечную точку
+    Z.append(cos(end_latitude)*sin(end_longitude));
+    Y.append(sin(end_latitude));
 
     QVector<QVector<double>> coordinates = {X, Z, Y};
 

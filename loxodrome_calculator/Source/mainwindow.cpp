@@ -2,7 +2,7 @@
 #include "cmath"
 #include "QDebug"
 #include <QtGraphsWidgets/q3dsurfacewidgetitem.h>
-//#include "QDoubleValidator"
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -10,28 +10,37 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    sw = new SecondWindow;
+    sw = new SecondWindow; // Создание классов
 
+    gw = new GraphsWindow;
+    gw->show();
 
     pf = new PlottingFunctions(this);
 
-    pf->PlotSphere();
+    pf->PlotSphere(); // Построение сферы
     pf->surface->widget()->show();
 
 
-    table_model = new QStandardItemModel;
+    table_model = new QStandardItemModel; // Создание таблицы
 
     table_model->setHorizontalHeaderLabels({"Долгота", "Широта (численная)", "Широта (аналитическая)", "Разница широт"});
     ui->loxodromes_coordinate_table->setModel(table_model);
+
+    ui->loxodromes_coordinate_table->setColumnWidth(0, 100);
+    ui->loxodromes_coordinate_table->setColumnWidth(1, 150);
+    ui->loxodromes_coordinate_table->setColumnWidth(2, 150);
+    ui->loxodromes_coordinate_table->setColumnWidth(3, 150);
 
 
     connect(sw, &SecondWindow::OpenMainWindow, this, &MainWindow::show);
     connect(sw, &SecondWindow::SendCoordinates, this, &MainWindow::GetCoordinates);
     connect(sw, &SecondWindow::ResetCamera, this, &MainWindow::on_reset_camera_clicked);
+    connect(sw, &SecondWindow::SendAbsoluteGraph, gw, &GraphsWindow::PlotAbsoluteGraph);
+    connect(sw, &SecondWindow::SendDifferenceGraph, gw, &GraphsWindow::PlotLongitudeDifferenceGraph);
 
     // Устанавливаем ограничение на ввод значений
     QRegularExpressionValidator *latitude_validator = new QRegularExpressionValidator(QRegularExpression("^(90(\\.0{1,3})?|([0-8]?[0-9])(\\.\\d{1,3})?)$"));
-    QRegularExpressionValidator *longitude_validator = new QRegularExpressionValidator(QRegularExpression("^(180(\\.0{1,3})?|([1]?[0-7][0-9])(\\.\\d{1,3})?)$"));
+    QRegularExpressionValidator *longitude_validator = new QRegularExpressionValidator(QRegularExpression("^(180(\\.0{1,3})?|([1][0-7][0-9])(\\.\\d{1,3})?|([0-9]?[0-9])(\\.\\d{1,3})?)$"));
 
     ui->start_longitude_line->setValidator(longitude_validator);
     ui->start_latitude_line->setValidator(latitude_validator);
@@ -101,22 +110,32 @@ void MainWindow::on_calculate_course_button_clicked()
 
 
     // Строим локсодрому двумя способами
+    // Аналитический
     loxodrome_length = gf.UnitsOfMeasurementChanging(lox_index, 0, loxodrome_length);
     QVector<QVector<double>> loxodrome_coordinates = gf.FindLoxodromePoints(start_latitude, end_latitude, start_longitude, end_longitude, course, loxodrome_length);
     pf->RePlot(loxodrome_coordinates[0], loxodrome_coordinates[1], loxodrome_coordinates[2], QColor(255, 0, 0));
 
+    QVector<QVector<double>> loxodrome_spheric_coordinates = gf.GetLatitudeAndLongitudeFromXZY(loxodrome_coordinates); // Строим график аналитической локсодромы
+    gw->PlotAbsoluteGraph(loxodrome_spheric_coordinates[0], loxodrome_spheric_coordinates[1], 0);
+
+    // Численный
     QVector<QVector<double>> numerical_loxodrome_coordinates = gf.FindNumericalLoxodromePoints(start_latitude, end_latitude, start_longitude, end_longitude, course, ui->delta_longitude_line->text().toDouble() * M_PI/180);
     pf->RePlot(numerical_loxodrome_coordinates[0], numerical_loxodrome_coordinates[1], numerical_loxodrome_coordinates[2], QColor(255, 255, 0));
 
-    // Выводим значения в таблицу
     QVector<QVector<double>> numerical_loxodrome_spheric_coordinates = gf.GetLatitudeAndLongitudeFromXZY(numerical_loxodrome_coordinates); // Задаем массивы сферических коордтнат
+    gw->PlotAbsoluteGraph(numerical_loxodrome_spheric_coordinates[0], numerical_loxodrome_spheric_coordinates[1], 1); // Строим график численной локсодромы
+
+    // Строим график разности широт
     QVector<double> loxodrome_latitudes;
 
-    for (int i = 0; i < numerical_loxodrome_spheric_coordinates[0].length(); i++)
+    for (int i = 0; i < numerical_loxodrome_spheric_coordinates[0].length(); i++) // Считаем аналитическую широту в тех же точках, что и численную
     {
         loxodrome_latitudes.append(gf.FindLatitude(start_latitude, start_longitude, numerical_loxodrome_spheric_coordinates[0][i], course));
     }
 
+    gw->PlotLatitudeDifferenceGraph(numerical_loxodrome_spheric_coordinates[0], loxodrome_latitudes, numerical_loxodrome_spheric_coordinates[1]); // Строим график
+
+    // Выводим значения в таблицу
     table_model->setRowCount(loxodrome_latitudes.length()); // Изменяем размер таблицы и вводим значения
 
     for(int i = 0; i < numerical_loxodrome_spheric_coordinates[0].length(); i++)
@@ -131,6 +150,10 @@ void MainWindow::on_calculate_course_button_clicked()
     orthodrome_length = gf.UnitsOfMeasurementChanging(orth_index, 0, orthodrome_length);
     QVector<QVector<double>> orthodrome_coordinates = gf.FindOrthodromePoints(start_latitude, end_latitude, start_longitude, end_longitude, orthodrome_length);
     pf->RePlot(orthodrome_coordinates[0], orthodrome_coordinates[1], orthodrome_coordinates[2], QColor(0, 255, 0));
+
+    QVector<QVector<double>> orthodrome_spheric_coordinates = gf.GetLatitudeAndLongitudeFromXZY(orthodrome_coordinates); // Задаем массивы сферических коордтнат
+    gw->PlotAbsoluteGraph(orthodrome_spheric_coordinates[0], orthodrome_spheric_coordinates[1], 2); // Строим график ортодромы
+
 }
 
 

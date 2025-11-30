@@ -6,6 +6,7 @@
 #include "QObject"
 #include "Headers/geodesicfunctions.h"
 #include "QCustom3DItem"
+// #include "QGraphicsView"
 
 
 class PlottingFunctions : public QObject
@@ -27,7 +28,7 @@ public:
 
     Q3DSurfaceWidgetItem *surface; // Виджет графика
 
-    QQuickWidget *quickWidget;
+    QQuickWidget *surface_widget;
 
     QVector<QSurface3DSeries*> all_loxodrome_series; // Массив с точками локсодромы
 
